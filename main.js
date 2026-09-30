@@ -4,7 +4,8 @@ var ctx=canvas.getContext("2d");
 const WIDTH=1920, HEIGHT=1080;
 var SPEED=1;
 
-var AMOUNT=1000;//temp change back to 100
+var AMOUNT=900;//temp change back to 100
+var REPROD=30;
 var GENS=0;
 var SCORE=0;
 var HIGHSCORE=0;
@@ -12,11 +13,15 @@ var HIGHSCORE=0;
 var GAMETICK;
 const SPAWNRATE=120;//every 2 second - ish
 
-var jump=false; //temp
+
 
 const HIDDEN=1;
 const SIZEROW=5;
+const INPUT=4;
+const OUTPUT=1;
 
+const MUTATECHANCE=0.01;
+const MUTATION=0.1;
 
 const BirdIMG=document.getElementById("birdIMG");
 
@@ -46,16 +51,49 @@ class Bird{
         ctx.drawImage(BirdIMG,this.x-this.halfW,this.y-this.halfH,this.width,this.height);
     }
     neural(){
-        //every layer
-        //temporary, just jump
-        /*if(jump){
-            jump=false;
-            return true;
-        }return false;*/
-        if(Math.random()<0.06){
-            return true;
-        }return false;
+        //first create inputs
+        var results=[];
+        results.push([]);//first row
+        //this y, gap y, distance x, and sy;
+        results[0].push(this.y / HEIGHT);//scaled height
+        //get a pipe
+        
+        var thePipe;
+        for(var pipe of PIPES){
+            if(pipe.x>this.x-this.width/2){
+                thePipe=pipe;
+                break;
+            }
+        }
+        if(thePipe==null){
+            results[0].push((HEIGHT/2)/HEIGHT);//any place but scaled
+            //any distance
+            results[0].push(1)//scaled
+        }else{
+            results[0].push(thePipe.y/HEIGHT)//scaled
+            results[0].push((thePipe.x-(this.x-this.width/2))/WIDTH);
+                //distance to left edge of the bird
+        }
+        results[0].push(this.sy/20);//scaled by 20
+
+        //this is the first column
+        for(var i=0; i<=HIDDEN; i++){
+            results.push([]);//new row
+            for(var j=0; j<(i==HIDDEN? OUTPUT : SIZEROW); j++){
+                //for each element
+                var temp=0;
+                for(var k=0; k<(i==0? INPUT: SIZEROW); k++){
+                    //automatic past as i=0 has row 1
+                    temp+=results[i][k]*this.weights[i][j][k];
+                }
+                temp+=this.biases[i][j];
+                if(i!=HIDDEN)temp=Math.max(0,temp);//relu for other
+                results[i+1].push(temp);
+            }
+        }
+        return (results[HIDDEN+1][0]>0);
     }
+
     logic(){
         if(this.neural()){
             this.sy=this.JUMPH;
@@ -128,6 +166,80 @@ function displayAll(){
 }
 
 
+function spawnBirds(){
+    if(GENS<=1){
+        //first generation, random for each
+        for(var it=0; it<AMOUNT; it++){
+            var tempWeight=[];
+            var tempBias=[];
+            //generate biases first
+            for(var i=0; i<=HIDDEN; i++){
+                tempBias.push([]);
+                for(var j=0; j<(i==HIDDEN? OUTPUT : SIZEROW); j++){
+                    tempBias[i].push(Math.random()*2-1);//from -1 to 1
+                }
+            }
+            //generate weights now
+            for(var i=0; i<=HIDDEN; i++){
+                tempWeight.push([]);
+                //from row i's jth to kth
+                for(var j=0; j<(i==HIDDEN ? OUTPUT: SIZEROW); j++){
+                    tempWeight[i].push([]);
+                    for(var k=0; k<(i==0? INPUT : SIZEROW); k++){
+                        tempWeight[i][j].push(Math.random()*2-1);//random link 
+                        //row i j to prev k
+                    }
+                }
+            }
+
+
+            BIRDS.push(new Bird(tempWeight,tempBias));
+        }
+        
+    }else{
+        var LIVERS=DEAD.slice(AMOUNT-REPROD);//REPROD eleements
+        for(var m=0; m<REPROD; m++){
+            for(var d=0; d<REPROD; d++){
+                var mom=LIVERS[m];
+                var dad=LIVERS[d];
+                //mom and dad
+                var tempWeight=[];
+                var tempBias=[];
+                //generate biases first
+                for(var i=0; i<=HIDDEN; i++){
+                    tempBias.push([]);
+                    for(var j=0; j<(i==HIDDEN? OUTPUT : SIZEROW); j++){
+                        tempBias[i].push((Math.random()>0.5?
+                        mom.biases[i][j]:dad.biases[i][j]));
+                        if(Math.random()<=MUTATECHANCE){
+                            tempBias[i][j]+=(Math.random()*2*MUTATION)-MUTATION;
+                        }
+                    }
+                }
+                //generate weights now
+                for(var i=0; i<=HIDDEN; i++){
+                    tempWeight.push([]);
+                    //from row i's jth to kth
+                    for(var j=0; j<(i==HIDDEN ? OUTPUT: SIZEROW); j++){
+                        tempWeight[i].push([]);
+                        for(var k=0; k<(i==0? INPUT : SIZEROW); k++){
+                            tempWeight[i][j].push(Math.random()>0.5?
+                                mom.weights[i][j][k]:dad.weights[i][j][k]
+                            );//random link 
+                            if(Math.random()<=MUTATECHANCE){
+                                tempWeight[i][j][k]+=(Math.random()*2*MUTATION)-MUTATION
+                            }
+                            
+                            //row i j to prev k
+                        }
+                    }
+                }
+                BIRDS.push(new Bird(tempWeight, tempBias));
+            }
+        }
+    }
+
+}
 
 
 function newGame(){
@@ -136,13 +248,15 @@ function newGame(){
 
     BIRDS=[];
     PIPES=[];
+
+    //spawn birds
+    spawnBirds();
+
     DEAD=[];
 
     GAMETICK=0;
 
-    for(var i=0; i<AMOUNT; i++){
-        BIRDS.push(new Bird());
-    }
+    
 
     displayAll();
     
@@ -212,15 +326,12 @@ requestAnimationFrame(gameLoop);
 
 
 window.addEventListener("keydown",function(ev){
-    if(ev.key==' '){
-        jump=true;
-        
-    }
+
     if(ev.key=='f'){
-        SPEED=3;
+        SPEED=10;
     }
     if(ev.key=='t'){
-        SPEED=5;
+        SPEED=120;
     }
 })
 window.addEventListener("keyup",function(ev){
