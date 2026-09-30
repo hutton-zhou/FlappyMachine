@@ -1,0 +1,15 @@
+*{
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+}
+div *{
+    margin:0;
+}
+div{
+    margin:auto;
+}
+
+canvas{
+    border:1px solid black;
+    max-height:50vh;
+}
