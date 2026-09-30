@@ -229,7 +229,7 @@ function spawnBirds(){
                     for(var j=0; j<(i==HIDDEN? OUTPUT : SIZEROW); j++){
                         tempBias[i].push((Math.random()>0.5?
                         mom.biases[i][j]:dad.biases[i][j]));
-                        if(Math.random()<=MUTATECHANCE && m!=d){
+                        if(Math.random()<=MUTATECHANCE){
                             tempBias[i][j]+=(Math.random()*2*MUTATION)-MUTATION;
                         }
                     }
@@ -244,7 +244,7 @@ function spawnBirds(){
                             tempWeight[i][j].push(Math.random()>0.5?
                                 mom.weights[i][j][k]:dad.weights[i][j][k]
                             );//random link 
-                            if(Math.random()<=MUTATECHANCE && m!=d){
+                            if(Math.random()<=MUTATECHANCE){
                                 tempWeight[i][j][k]+=(Math.random()*2*MUTATION)-MUTATION
                             }
                             
