@@ -4,6 +4,7 @@ var ctx=canvas.getContext("2d");
 const WIDTH=1920, HEIGHT=1080;
 var SPEED=1;
 
+var AMOUNT=1000;//temp change back to 100
 var GENS=0;
 var SCORE=0;
 var HIGHSCORE=0;
@@ -47,8 +48,11 @@ class Bird{
     neural(){
         //every layer
         //temporary, just jump
-        if(jump){
+        /*if(jump){
             jump=false;
+            return true;
+        }return false;*/
+        if(Math.random()<0.06){
             return true;
         }return false;
     }
@@ -137,7 +141,9 @@ function newGame(){
 
     GAMETICK=0;
 
-    BIRDS.push(new Bird());
+    for(var i=0; i<AMOUNT; i++){
+        BIRDS.push(new Bird());
+    }
 
     displayAll();
     
@@ -157,7 +163,11 @@ function logic(){
     //kill birds
     var survivors=[];
     for(var bird of BIRDS){
-        if(!bird.dead)survivors.push(bird);
+        if(!bird.dead){
+            survivors.push(bird);
+        }else{
+            DEAD.push(bird);
+        }
     }
     if(BIRDS.length>=1 && survivors.length==0){
         setTimeout(newGame,250);
@@ -201,5 +211,16 @@ window.addEventListener("keydown",function(ev){
     if(ev.key==' '){
         jump=true;
         
+    }
+    if(ev.key=='f'){
+        SPEED=3;
+    }
+    if(ev.key=='t'){
+        SPEED=5;
+    }
+})
+window.addEventListener("keyup",function(ev){
+    if(ev.key=='f' || ev.key=='t'){
+        SPEED=1;
     }
 })
