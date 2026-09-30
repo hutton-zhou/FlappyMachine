@@ -6,7 +6,7 @@ var SPEED=1;
 
 var GENS=0;
 var SCORE=0;
-var ALIVE=100;
+var HIGHSCORE=0;
 
 var GAMETICK;
 const SPAWNRATE=120;//every 2 second - ish
@@ -15,6 +15,7 @@ var jump=false; //temp
 
 const HIDDEN=1;
 const SIZEROW=5;
+
 
 const BirdIMG=document.getElementById("birdIMG");
 
@@ -26,7 +27,7 @@ class Bird{
         this.halfW=this.width/2;
         this.halfH=this.height/2; //all constant
 
-        this.x=200;
+        this.x=100;
         this.y=(1080/2);//center coordinate
 
         this.JUMPH=-20;
@@ -39,7 +40,6 @@ class Bird{
         //first layer is 0, output is HIDDEN
 
         this.dead=false;
-        
     }
     draw(){
         ctx.drawImage(BirdIMG,this.x-this.halfW,this.y-this.halfH,this.width,this.height);
@@ -75,7 +75,13 @@ class Bird{
                     this.dead=true;
                 }
             }
-            //dying logic done
+            //dying logic for pipes
+        }
+        if(this.y+this.height/2>HEIGHT+this.height){
+            //die
+            this.dead=true;
+        }if(this.y-this.height/2<-this.height){
+            this.dead=true;
         }
         
 
@@ -89,6 +95,7 @@ class Pipe{
         this.y=Math.random()*((HEIGHT-this.gap/2)-(this.gap/2))+(this.gap/2)
         //constrain the random
         this.speed=6;
+        this.delete=false;
     }
     draw(){
         ctx.fillStyle="green";
@@ -99,17 +106,30 @@ class Pipe{
     }
     logic(){
         this.x-=this.speed;
+        if(this.x<0){
+            SCORE++;
+            this.delete=true;
+        }
     }
 }
 
 var BIRDS=[];
 var PIPES=[];
 var DEAD=[];
+function displayAll(){
+    document.getElementById("gen").textContent=GENS;
+    document.getElementById("score").textContent=SCORE;
+    document.getElementById("alive").textContent=BIRDS.length;
+    HIGHSCORE=Math.max(SCORE,HIGHSCORE);
+    document.getElementById("high").textContent=HIGHSCORE;
+}
+
+
+
 
 function newGame(){
     GENS++;
     SCORE=0;
-    ALIVE=100;
 
     BIRDS=[];
     PIPES=[];
@@ -118,6 +138,8 @@ function newGame(){
     GAMETICK=0;
 
     BIRDS.push(new Bird());
+
+    displayAll();
     
 }
 
@@ -129,15 +151,19 @@ function logic(){
     for(var pipe of PIPES){
         pipe.logic();
     }
+    
+    
+    while(PIPES.length>0 && PIPES[0].delete)PIPES.shift();
     //kill birds
-    var ptr=0;
-    while(ptr<BIRDS.length){
-        if(BIRDS[ptr].dead){
-            DEAD.push(BIRDS.pop(ptr));
-        }else{
-            ptr++;
-        }
+    var survivors=[];
+    for(var bird of BIRDS){
+        if(!bird.dead)survivors.push(bird);
     }
+    if(BIRDS.length>=1 && survivors.length==0){
+        setTimeout(newGame,250);
+    }
+    BIRDS=survivors;
+    
     //spawn pipes
     if(GAMETICK%SPAWNRATE==0){
         PIPES.push(new Pipe());
@@ -153,6 +179,7 @@ function draw(){
     for(var pipe of PIPES){
         pipe.draw();
     }
+    displayAll();
 }
 
 function gameLoop(){
@@ -163,8 +190,11 @@ function gameLoop(){
     requestAnimationFrame(gameLoop);
 }
 
+
 newGame();
 requestAnimationFrame(gameLoop);
+
+
 
 
 window.addEventListener("keydown",function(ev){
