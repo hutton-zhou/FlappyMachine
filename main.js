@@ -111,7 +111,6 @@ class Pipe{
     logic(){
         this.x-=this.speed;
         if(this.x<0){
-            SCORE++;
             this.delete=true;
         }
     }
@@ -159,7 +158,12 @@ function logic(){
     }
     
     
-    while(PIPES.length>0 && PIPES[0].delete)PIPES.shift();
+    while(PIPES.length>0 && PIPES[0].delete){
+        PIPES.shift();
+        
+        SCORE++;
+    }
+
     //kill birds
     var survivors=[];
     for(var bird of BIRDS){
