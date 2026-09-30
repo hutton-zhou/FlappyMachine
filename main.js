@@ -25,8 +25,20 @@ const MUTATION=0.1;
 
 const BirdIMG=document.getElementById("birdIMG");
 
+var DRAWINGS=[];
+for(var i=0; i<360; i++){
+    let drawer=document.createElement("canvas");
+    drawer.height=24;
+    drawer.width=34;
+    let dctx=drawer.getContext("2d");
+
+    dctx.filter=`hue-rotate(${i}deg)`;
+    dctx.drawImage(BirdIMG,0,0);
+    DRAWINGS.push(drawer);
+}
+
 class Bird{
-    constructor(weights, biases){
+    constructor(weights, biases, color){
         var scale=3;
         this.width=34*scale;
         this.height=24*scale;
@@ -35,6 +47,8 @@ class Bird{
 
         this.x=100;
         this.y=(1080/2);//center coordinate
+
+        this.color=color;
 
         this.JUMPH=-20;
         this.GRAV=1.5;
@@ -46,9 +60,14 @@ class Bird{
         //first layer is 0, output is HIDDEN
 
         this.dead=false;
+
+        //draw color
+        
     }
     draw(){
-        ctx.drawImage(BirdIMG,this.x-this.halfW,this.y-this.halfH,this.width,this.height);
+        
+        ctx.drawImage(DRAWINGS[Math.floor(this.color)],this.x-this.halfW,this.y-this.halfH,this.width,this.height);
+        
     }
     neural(){
         //first create inputs
@@ -192,7 +211,7 @@ function spawnBirds(){
             }
 
 
-            BIRDS.push(new Bird(tempWeight,tempBias));
+            BIRDS.push(new Bird(tempWeight,tempBias,Math.random()*360));
         }
         
     }else{
@@ -233,7 +252,11 @@ function spawnBirds(){
                         }
                     }
                 }
-                BIRDS.push(new Bird(tempWeight, tempBias));
+                var diff=((dad.color+360)-mom.color)%360;
+            
+                BIRDS.push(new Bird(tempWeight, tempBias,
+                    (mom.color+diff/2 + 360 + (Math.random()*2-1))%360
+                ));
             }
         }
     }
