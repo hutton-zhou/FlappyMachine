@@ -15,8 +15,8 @@ const SPAWNRATE=120;//every 2 second - ish
 
 
 
-const HIDDEN=1;
-const SIZEROW=5;
+const HIDDEN=2;
+const SIZEROW=4;
 const INPUT=4;
 const OUTPUT=1;
 
@@ -161,7 +161,6 @@ function displayAll(){
     document.getElementById("gen").textContent=GENS;
     document.getElementById("score").textContent=SCORE;
     document.getElementById("alive").textContent=BIRDS.length;
-    HIGHSCORE=Math.max(SCORE,HIGHSCORE);
     document.getElementById("high").textContent=HIGHSCORE;
 }
 
@@ -276,6 +275,7 @@ function logic(){
         PIPES.shift();
         
         SCORE++;
+        HIGHSCORE=Math.max(SCORE,HIGHSCORE);
     }
 
     //kill birds
@@ -287,9 +287,7 @@ function logic(){
             DEAD.push(bird);
         }
     }
-    if(BIRDS.length>=1 && survivors.length==0){
-        setTimeout(newGame,250);
-    }
+
     BIRDS=survivors;
     
     //spawn pipes
@@ -297,6 +295,9 @@ function logic(){
         PIPES.push(new Pipe());
     }
     GAMETICK++;
+
+    //new game
+    if(BIRDS.length==0)newGame();
 }
 
 function draw(){
@@ -328,14 +329,21 @@ requestAnimationFrame(gameLoop);
 window.addEventListener("keydown",function(ev){
 
     if(ev.key=='f'){
-        SPEED=10;
+        SPEED=5; //fast
+    }
+    if(ev.key=='h'){
+        SPEED=50; //hyper
     }
     if(ev.key=='t'){
-        SPEED=120;
+        SPEED=1000; //turbo
     }
+    if(ev.key=='g'){
+        SPEED=10_000; //god
+    }
+    
 })
 window.addEventListener("keyup",function(ev){
-    if(ev.key=='f' || ev.key=='t'){
+    if(ev.key=='f' || ev.key=='h' || ev.key=='t' || ev.key=='g'){
         SPEED=1;
     }
 })
