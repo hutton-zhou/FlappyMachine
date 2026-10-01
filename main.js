@@ -13,7 +13,7 @@ var HIGHSCORE=0;
 var GAMETICK;
 const SPAWNRATE=120;//every 2 second - ish
 
-
+const EXPAND=15;
 
 const HIDDEN=2;
 const SIZEROW=4;
@@ -281,6 +281,7 @@ function spawnBirds(){
 
 
 function newGame(){
+    console.log("A new round begins.");
     GENS++;
     SCORE=0;
 
@@ -323,11 +324,16 @@ function logic(){
         if(!bird.dead){
             survivors.push(bird);
         }else{
+            //last birds
+            if(BIRDS.length<=EXPAND){
+                console.log(`${bird.name} ${roman(bird.num)} has died.`);
+            }
             DEAD.push(bird);
         }
     }
 
     BIRDS=survivors;
+
     
     //spawn pipes
     if(GAMETICK%SPAWNRATE==0){
@@ -406,9 +412,8 @@ function draw(){
     document.getElementById("racers").innerHTML="";
     //clear it
 
-    var expand=15;
 
-    for(var bird of BIRDS.slice(0,expand)){// top 10
+    for(var bird of BIRDS.slice(0,EXPAND)){// top 15
         var newRow=document.createElement("div");
         newRow.class="row";
         newRow.appendChild(DRAWINGS[Math.floor(bird.color)]);
@@ -423,9 +428,9 @@ function draw(){
 
         document.getElementById("racers").appendChild(newRow);
     }
-    if(BIRDS.length>expand){
+    if(BIRDS.length>EXPAND){
         var p=document.createElement("div");
-        p.textContent=`${BIRDS.length-expand} more birds`;
+        p.textContent=`${BIRDS.length-EXPAND} more birds`;
         document.getElementById("racers").appendChild(p);
     }
     
