@@ -266,7 +266,7 @@ function spawnBirds(){
                 var num=NAMEFREQ[name];
 
                 BIRDS.push(new Bird(tempWeight, tempBias,
-                    (mom.color+diff/2 + 360 + (Math.random()*2-1))%360
+                    (mom.color+diff/2 + 360 + (Math.random()*10-10))%360
                 ,name,num));
             }
         }
