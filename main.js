@@ -4,8 +4,8 @@ var ctx=canvas.getContext("2d");
 const WIDTH=1920, HEIGHT=1080;
 var SPEED=1;
 
-var AMOUNT=900;//temp change back to 100
-var REPROD=30;
+var AMOUNT=1600;//temp change back to 100
+var REPROD=40;
 var GENS=0;
 var SCORE=0;
 var HIGHSCORE=0;
@@ -216,7 +216,7 @@ function spawnBirds(){
         
     }else{
         var LIVERS=DEAD.slice(AMOUNT-REPROD);//REPROD eleements
-        for(var m=0; m<REPROD; m++){
+        for(var m=1; m<REPROD; m++){
             for(var d=0; d<REPROD; d++){
                 var mom=LIVERS[m];
                 var dad=LIVERS[d];
@@ -258,6 +258,9 @@ function spawnBirds(){
                     (mom.color+diff/2 + 360 + (Math.random()*2-1))%360
                 ));
             }
+        }
+        for(var p=0; p<REPROD; p++){
+            BIRDS.push(LIVERS[p]); // elitism
         }
     }
 
