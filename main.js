@@ -281,7 +281,6 @@ function spawnBirds(){
 
 
 function newGame(){
-    console.log("A new round begins.");
     GENS++;
     SCORE=0;
 
@@ -324,10 +323,7 @@ function logic(){
         if(!bird.dead){
             survivors.push(bird);
         }else{
-            //last birds
-            if(BIRDS.length<=EXPAND){
-                console.log(`${bird.name} ${roman(bird.num)} has died.`);
-            }
+            
             DEAD.push(bird);
         }
     }
