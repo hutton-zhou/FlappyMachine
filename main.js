@@ -38,7 +38,7 @@ for(var i=0; i<360; i++){
 }
 
 class Bird{
-    constructor(weights, biases, color, name){
+    constructor(weights, biases, color, name, num){
         var scale=3;
         this.width=34*scale;
         this.height=24*scale;
@@ -62,6 +62,7 @@ class Bird{
         this.dead=false;
 
         this.name=name;
+        this.num=num;
 
         //draw color
         
@@ -89,7 +90,7 @@ class Bird{
         if(thePipe==null){
             results[0].push((HEIGHT/2)/HEIGHT);//any place but scaled
             //any distance
-            results[0].push(1)//scaled
+            results[0].push(1)//scaled distance
         }else{
             results[0].push(thePipe.y/HEIGHT)//scaled
             results[0].push((thePipe.x-(this.x-this.width/2))/WIDTH);
@@ -159,6 +160,7 @@ class Pipe{
         //constrain the random
         this.speed=6;
         this.delete=false;
+
     }
     draw(){
         ctx.fillStyle="green";
@@ -178,6 +180,7 @@ class Pipe{
 var BIRDS=[];
 var PIPES=[];
 var DEAD=[];
+var NAMEFREQ={};
 function displayAll(){
     document.getElementById("gen").textContent=GENS;
     document.getElementById("score").textContent=SCORE;
@@ -212,8 +215,11 @@ function spawnBirds(){
                 }
             }
 
+            var name=NAMES[Math.floor(Math.random()*NAMES.length)];
+            NAMEFREQ[name]=(NAMEFREQ[name]==null?1:NAMEFREQ[name]+1);
+            var num=NAMEFREQ[name];
 
-            BIRDS.push(new Bird(tempWeight,tempBias,Math.random()*360,NAMES[Math.floor(Math.random()*NAMES.length)]));
+            BIRDS.push(new Bird(tempWeight,tempBias,Math.random()*360,name,num));
         }
         
     }else{
@@ -255,10 +261,13 @@ function spawnBirds(){
                     }
                 }
                 var diff=((dad.color+360)-mom.color)%360;
-            
+                var name=mom.name.substring(0,3)+dad.name.substring(3);
+                NAMEFREQ[name]=(NAMEFREQ[name]==null?1:NAMEFREQ[name]+1);
+                var num=NAMEFREQ[name];
+
                 BIRDS.push(new Bird(tempWeight, tempBias,
                     (mom.color+diff/2 + 360 + (Math.random()*2-1))%360
-                ,mom.name.substring(0,3)+dad.name.substring(3)));
+                ,name,num));
             }
         }
         for(var p=0; p<REPROD; p++){
@@ -327,6 +336,60 @@ function logic(){
     //new game
     if(BIRDS.length==0)newGame();
 }
+function roman(num){
+    var s="";
+    
+    if(num>3999){
+        s+=Math.floor(num/1000);
+        s+="k ";
+    }else{
+        while(num>=1000){
+        num-=1000;
+        s+="M";//thousands now hundreds
+    }
+}
+
+    
+    switch(Math.floor(num/100)){
+        case 0:  break;
+        case 1:   s+="C";   break;
+        case 2: s+="CC";    break;
+        case 3: s+="CCC"; break;
+        case 4:s+="CD";break;
+        case 5: s+="D"; break;
+        case 6: s+="DC"; break;
+        case 7: s+="DCC"; break;
+        case 8: s+="DCCC"; break;
+        case 9: s+="CM"; break;
+    }
+    num=num%100;
+    switch(Math.floor(num/10)){
+        case 0:  break;
+        case 1:   s+="X";   break;
+        case 2: s+="XX";    break;
+        case 3: s+="XXX"; break;
+        case 4:s+="XL";break;
+        case 5: s+="L"; break;
+        case 6: s+="LX"; break;
+        case 7: s+="LXX"; break;
+        case 8: s+="LXXX"; break;
+        case 9: s+="XC"; break;
+    }
+    num=num%10;
+    switch(num){
+        case 0:  break;
+        case 1:   s+="I";   break;
+        case 2: s+="II";    break;
+        case 3: s+="III"; break;
+        case 4:s+="IV";break;
+        case 5: s+="V"; break;
+        case 6: s+="VI"; break;
+        case 7: s+="VII"; break;
+        case 8: s+="VIII"; break;
+        case 9: s+="IX"; break;
+    }
+    return s;
+}
 
 function draw(){
     ctx.clearRect(0,0,WIDTH,HEIGHT);
@@ -340,17 +403,30 @@ function draw(){
     //html adding
     document.getElementById("racers").innerHTML="";
     //clear it
-    for(var bird of BIRDS){
+
+    var expand=15;
+
+    for(var bird of BIRDS.slice(0,expand)){// top 10
         var newRow=document.createElement("div");
         newRow.class="row";
         newRow.appendChild(DRAWINGS[Math.floor(bird.color)]);
 
         var p=document.createElement("span");
         p.textContent=bird.name;
+        if(bird.num>1){
+            p.textContent=`${bird.name} ${roman(bird.num)}`;
+        }
+        
         newRow.appendChild(p);
 
         document.getElementById("racers").appendChild(newRow);
     }
+    if(BIRDS.length>expand){
+        var p=document.createElement("div");
+        p.textContent=`${BIRDS.length-expand} more birds`;
+        document.getElementById("racers").appendChild(p);
+    }
+    
     
     document.getElementById("racers").style.width=canvas.clientWidth+"px";
     
