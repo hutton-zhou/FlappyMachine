@@ -38,7 +38,7 @@ for(var i=0; i<360; i++){
 }
 
 class Bird{
-    constructor(weights, biases, color){
+    constructor(weights, biases, color, name){
         var scale=3;
         this.width=34*scale;
         this.height=24*scale;
@@ -60,6 +60,8 @@ class Bird{
         //first layer is 0, output is HIDDEN
 
         this.dead=false;
+
+        this.name=name;
 
         //draw color
         
@@ -211,7 +213,7 @@ function spawnBirds(){
             }
 
 
-            BIRDS.push(new Bird(tempWeight,tempBias,Math.random()*360));
+            BIRDS.push(new Bird(tempWeight,tempBias,Math.random()*360,NAMES[Math.floor(Math.random()*NAMES.length)]));
         }
         
     }else{
@@ -256,7 +258,7 @@ function spawnBirds(){
             
                 BIRDS.push(new Bird(tempWeight, tempBias,
                     (mom.color+diff/2 + 360 + (Math.random()*2-1))%360
-                ));
+                ,mom.name.substring(0,3)+dad.name.substring(3)));
             }
         }
         for(var p=0; p<REPROD; p++){
@@ -335,6 +337,23 @@ function draw(){
         pipe.draw();
     }
     displayAll();
+    //html adding
+    document.getElementById("racers").innerHTML="";
+    //clear it
+    for(var bird of BIRDS){
+        var newRow=document.createElement("div");
+        newRow.class="row";
+        newRow.appendChild(DRAWINGS[Math.floor(bird.color)]);
+
+        var p=document.createElement("span");
+        p.textContent=bird.name;
+        newRow.appendChild(p);
+
+        document.getElementById("racers").appendChild(newRow);
+    }
+    
+    document.getElementById("racers").style.width=canvas.clientWidth+"px";
+    
 }
 
 function gameLoop(){
