@@ -106,7 +106,7 @@ class Bird{
                     temp+=results[i][k]*this.weights[i][j][k];
                 }
                 temp+=this.biases[i][j];
-                if(i!=HIDDEN)temp=Math.max(0,temp);//relu for other
+                if(i!=HIDDEN)temp=Math.tanh(temp);//relu for other
                 results[i+1].push(temp);
             }
         }
