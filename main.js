@@ -461,10 +461,13 @@ window.addEventListener("keydown",function(ev){
     if(ev.key=='g'){
         SPEED=10_000; //god
     }
+    if(ev.key=='p'){
+        SPEED=0;
+    }
     
 })
 window.addEventListener("keyup",function(ev){
-    if(ev.key=='f' || ev.key=='h' || ev.key=='t' || ev.key=='g'){
+    if(ev.key=='f' || ev.key=='h' || ev.key=='t' || ev.key=='g' || ev.key=='p'){
         SPEED=1;
     }
 })
