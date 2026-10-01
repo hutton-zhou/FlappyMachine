@@ -323,7 +323,6 @@ function logic(){
         if(!bird.dead){
             survivors.push(bird);
         }else{
-            
             DEAD.push(bird);
         }
     }
