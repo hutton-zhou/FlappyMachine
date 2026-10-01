@@ -271,7 +271,8 @@ function spawnBirds(){
             }
         }
         for(var p=0; p<REPROD; p++){
-            BIRDS.push(LIVERS[p]); // elitism
+            var par=LIVERS[p];
+            BIRDS.push(new Bird(par.weights,par.biases,par.color,par.name,par.num)); // elitism
         }
     }
 
@@ -429,6 +430,15 @@ function draw(){
     
     
     document.getElementById("racers").style.width=canvas.clientWidth+"px";
+
+    //pause text
+    if(SPEED==0){
+        ctx.fillStyle="rgba(0,0,0,0.25)";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
+        ctx.font="bold 100px 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif";
+        ctx.fillText("PAUSED",WIDTH/2,HEIGHT/2);
+    }
     
 }
 
@@ -462,12 +472,16 @@ window.addEventListener("keydown",function(ev){
         SPEED=10_000; //god
     }
     if(ev.key=='p'){
-        SPEED=0;
+        if(SPEED!=0){
+            SPEED=0;
+        }else{
+            SPEED=1;//pause fix
+        }
     }
     
 })
 window.addEventListener("keyup",function(ev){
-    if(ev.key=='f' || ev.key=='h' || ev.key=='t' || ev.key=='g' || ev.key=='p'){
+    if(ev.key=='f' || ev.key=='h' || ev.key=='t' || ev.key=='g'){
         SPEED=1;
     }
 })
