@@ -275,6 +275,7 @@ function spawnBirds(){
             BIRDS.push(new Bird(par.weights,par.biases,par.color,par.name,par.num)); // elitism
         }
     }
+    BIRDS.reverse();//old ones at top
 
 }
 
